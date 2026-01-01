@@ -1,7 +1,42 @@
-import React from "react";
-import blogs from "../data/blogs/blog";
+import React, { useEffect } from "react";
+import useStore from "../store.js";
 
 const BlogPage = ({ isActive }) => {
+    const { blogs, loading, error, fetchBlogs } = useStore();
+
+    useEffect(() => {
+        if (isActive && blogs.length === 0) {
+            fetchBlogs();
+            console.log(blogs);     
+        }
+    }, [isActive, blogs.length, fetchBlogs]);
+
+    if (loading) {
+        return (
+            <article className={`blog ${isActive ? "active" : ""}`} data-page="blog">
+                <header>
+                    <h2 className="h2 article-title">Blog</h2>
+                </header>
+                <section className="blog-posts">
+                    <div className="loading">Loading blogs...</div>
+                </section>
+            </article>
+        );
+    }
+
+    if (error) {
+        return (
+            <article className={`blog ${isActive ? "active" : ""}`} data-page="blog">
+                <header>
+                    <h2 className="h2 article-title">Blog</h2>
+                </header>
+                <section className="blog-posts">
+                    <div className="error">Error loading blogs: {error}</div>
+                </section>
+            </article>
+        );
+    }
+
     return (
         <article className={`blog ${isActive ? "active" : ""}`} data-page="blog">
             <header>

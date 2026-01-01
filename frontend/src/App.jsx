@@ -18,10 +18,19 @@ import backgroundVideoOrange from "./assets/images/background-orange.mp4";
 import backgroundVideoPink from "./assets/images/background-pink.mp4";
 import backgroundVideoCyan from "./assets/images/background-cyan.mp4";
 
+import useStore from "./store"; // Import Zustand store
+
 function App() {
   const [currentTheme, setCurrentTheme] = useState("violet");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [activePage, setActivePage] = useState("about");
+  
+  // Use Zustand to fetch all data on initial load
+  const fetchAllData = useStore((state) => state.fetchAllData);
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
   const themeVideos = {
     violet: backgroundVideoViolet,
@@ -102,15 +111,26 @@ function App() {
           </article>
 
           <article className={`portfolio ${activePage === "portfolio" ? "active" : ""}`} data-page="portfolio">
-            <header>
+             <header>
               <h2 className="h2 article-title">Portfolio</h2>
             </header>
-            <ProjectsSection currentTheme={currentTheme} />
+            <ProjectsSection />
           </article>
- 
 
-          <BlogPage isActive={activePage === "blog"} />
-          <Contact isActive={activePage === "contact"} />
+          <article className={`blog ${activePage === "blog" ? "active" : ""}`} data-page="blog">
+             <header>
+              <h2 className="h2 article-title">Blog</h2>
+            </header>
+            <BlogPage isActive={activePage === "blog"} />
+          </article>
+
+          <article className={`contact ${activePage === "contact" ? "active" : ""}`} data-page="contact">
+            <header>
+              <h2 className="h2 article-title">Contact</h2>
+            </header>
+            <Contact isActive={activePage === "contact"} />
+          </article>
+
         </div>
       </main>
     </div>
