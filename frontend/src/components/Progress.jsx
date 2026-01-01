@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { IonIcon } from "@ionic/react";
 import { bookOutline, statsChartOutline, gitBranchOutline } from "ionicons/icons";
+import useStore from "../store.js";
 
 const Progress = ({ currentTheme }) => {
-    const [progressData, setProgressData] = useState([]);
+    const { progress, loading, error, fetchProgress } = useStore();
     const [displayedItems, setDisplayedItems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [page, setPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
-
     const observerTarget = useRef(null);
 
-    const FIREBASE_URL = 'https://pfolio-progress-default-rtdb.asia-southeast1.firebasedatabase.app/.json';
     const GITHUB_USERNAME = 'shourya-sharma-33';
 
     // Theme color mapping
@@ -38,53 +35,29 @@ const Progress = ({ currentTheme }) => {
     const chartColor = themeColors[currentTheme] || themeColors.violet;
     const statsTheme = githubStatsThemes[currentTheme] || 'radical';
 
-    // Fetch all data once
+    // Fetch progress data from store
     useEffect(() => {
-        const fetchProgress = async () => {
-            try {
-                const response = await fetch(FIREBASE_URL);
-                const data = await response.json();
+        if (progress.length === 0) {
+            fetchProgress();
+        }
+    }, [progress.length, fetchProgress]);
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-
-                if (data && Array.isArray(data)) {
-                    const sorted = data.filter(item => item !== null).sort((a, b) => b.sequence - a.sequence);
-                    setProgressData(sorted);
-                } else if (data && typeof data === 'object') {
-                    const dataArray = Object.values(data).filter(item => item !== null);
-                    const sorted = dataArray.sort((a, b) => b.sequence - a.sequence);
-                    setProgressData(sorted);
-                } else {
-                    setError('No data found');
-                }
-
-                setLoading(false);
-            } catch (err) {
-                console.error('Error:', err);
-                setError(err.message);
-                setLoading(false);
-            }
-        };
-
-        fetchProgress();
-    }, []);
-
+    // Sort and paginate progress data
     useEffect(() => {
-        if (progressData.length > 0) {
+        if (progress.length > 0) {
+            const sorted = progress.filter(item => item !== null).sort((a, b) => b.sequence - a.sequence);
             const startIndex = 0;
             const endIndex = page * ITEMS_PER_PAGE;
-            setDisplayedItems(progressData.slice(startIndex, endIndex));
+            setDisplayedItems(sorted.slice(startIndex, endIndex));
         }
-    }, [progressData, page]);
+    }, [progress, page]);
 
     const loadMore = useCallback((entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && displayedItems.length < progressData.length) {
+        if (entry.isIntersecting && displayedItems.length < progress.length) {
             setPage(prev => prev + 1);
         }
-    }, [displayedItems.length, progressData.length]);
+    }, [displayedItems.length, progress.length]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(loadMore, {
@@ -133,7 +106,7 @@ const Progress = ({ currentTheme }) => {
         );
     }
 
-    const hasMore = displayedItems.length < progressData.length;
+    const hasMore = displayedItems.length < progress.length;
 
     // Reusable card wrapper style
     const cardStyle = {

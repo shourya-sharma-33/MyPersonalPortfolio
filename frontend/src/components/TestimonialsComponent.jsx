@@ -1,13 +1,40 @@
-import React from "react";
-import { IonIcon } from "@ionic/react";
-import { lockClosed } from "ionicons/icons";
-import iconQuote from "../assets/images/icon-quote.svg";
-import avatar1 from "../assets/images/avatar-1.png";
-import testimonials from "../data/testimonials/testimonials";
+import React, { useEffect } from "react";
+import useStore from "../store.js";
+import LockedContentOverlay from "./LockedContentOverlay";
 
 const TestimonialsComponent = ({ openModal }) => {
+    const { testimonials, loading, error, fetchTestimonials } = useStore();
+
+    useEffect(() => {
+        if (testimonials.length === 0) {
+            fetchTestimonials();
+        }
+    }, [testimonials.length, fetchTestimonials]);
+
+    if (loading) {
+        return (
+            <LockedContentOverlay>
+                <section className="testimonials">
+                    <h3 className="h3 testimonials-title">Testimonials</h3>
+                    <div className="loading">Loading testimonials...</div>
+                </section>
+            </LockedContentOverlay>
+        );
+    }
+
+    if (error) {
+        return (
+            <LockedContentOverlay>
+                <section className="testimonials">
+                    <h3 className="h3 testimonials-title">Testimonials</h3>
+                    <div className="error">Error loading testimonials: {error}</div>
+                </section>
+            </LockedContentOverlay>
+        );
+    }
+
     return (
-        <div className="locked-content">
+        <LockedContentOverlay>
             <section className="testimonials">
                 <h3 className="h3 testimonials-title">Testimonials</h3>
 
@@ -39,11 +66,7 @@ const TestimonialsComponent = ({ openModal }) => {
                     ))}
                 </ul>
             </section>
-
-            <div className="locked-content-overlay">
-                <IonIcon icon={lockClosed} className="text-9xl text-white" />
-            </div>
-        </div>
+        </LockedContentOverlay>
     );
 };
 

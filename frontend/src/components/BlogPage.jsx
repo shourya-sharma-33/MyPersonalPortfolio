@@ -38,10 +38,7 @@ const BlogPage = ({ isActive }) => {
     }
 
     return (
-        <article className={`blog ${isActive ? "active" : ""}`} data-page="blog">
-            <header>
-                <h2 className="h2 article-title">Blog</h2>
-            </header>
+       
 
             <section className="blog-posts">
                 <ul className="blog-posts-list">
@@ -67,7 +64,7 @@ const BlogPage = ({ isActive }) => {
                     ))}
                 </ul>
             </section>
-        </article>
+    
     );
 };
 

@@ -1,14 +1,42 @@
-import React from "react";
-import { IonIcon } from "@ionic/react";
-import { lockClosed } from "ionicons/icons";
-import clients from "../data/clients/clients";
+import React, { useEffect } from "react";
+import useStore from "../store.js";
+import LockedContentOverlay from "./LockedContentOverlay";
 
 const ClientsComponent = () => {
+    const { clients, loading, error, fetchClients } = useStore();
+
+    useEffect(() => {
+        if (clients.length === 0) {
+            fetchClients();
+        }
+    }, [clients.length, fetchClients]);
+
+    if (loading) {
+        return (
+            <LockedContentOverlay>
+                <section className="clients">
+                    <h3 className="h3 clients-title">Clients</h3>
+                    <div className="loading">Loading clients...</div>
+                </section>
+            </LockedContentOverlay>
+        );
+    }
+
+    if (error) {
+        return (
+            <LockedContentOverlay>
+                <section className="clients">
+                    <h3 className="h3 clients-title">Clients</h3>
+                    <div className="error">Error loading clients: {error}</div>
+                </section>
+            </LockedContentOverlay>
+        );
+    }
+
     return (
-        <div className="locked-content">
+        <LockedContentOverlay>
             <section className="clients">
                 <h3 className="h3 clients-title">Clients</h3>
-
                 <ul className="clients-list has-scrollbar">
                     {clients.map((client, index) => (
                         <li className="clients-item" key={index}>
@@ -19,11 +47,7 @@ const ClientsComponent = () => {
                     ))}
                 </ul>
             </section>
-
-            <div className="locked-content-overlay">
-                <IonIcon icon={lockClosed} className="text-9xl text-white" />
-            </div>
-        </div>
+        </LockedContentOverlay>
     );
 };
 

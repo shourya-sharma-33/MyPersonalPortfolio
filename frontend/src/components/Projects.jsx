@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IonIcon } from "@ionic/react";
 import { chevronDown, eyeOutline } from "ionicons/icons";
-import projects, { projectCategories } from "../data/projects/projects";
+import useStore from "../store.js";
 
 export default function ProjectsSection({ currentTheme }) {
+    const { projects, loading, error, fetchProjects } = useStore();
     const [selected, setSelected] = useState("All");
     const [selectOpen, setSelectOpen] = useState(false);
 
@@ -19,6 +20,18 @@ export default function ProjectsSection({ currentTheme }) {
 
     const currentColor = themeColors[currentTheme] || themeColors.violet;
 
+    // Extract categories from projects data dynamically
+    const projectCategories = projects.length > 0
+        ? ["All", ...new Set(projects.map(p => p.cat))]
+        : ["All"];
+
+    // Fetch projects on mount
+    useEffect(() => {
+        if (projects.length === 0) {
+            fetchProjects();
+        }
+    }, [projects.length, fetchProjects]);
+
     const handleFilter = (cat) => {
         setSelected(cat);
         setSelectOpen(false);
@@ -32,6 +45,24 @@ export default function ProjectsSection({ currentTheme }) {
     const filterProject = (project) => {
         return selected === "All" || project.cat === selected;
     };
+
+    if (loading) {
+        return (
+            <section className="projects">
+                <div style={{ textAlign: 'center', padding: '2rem' }}>Loading projects...</div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="projects">
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
+                    Error loading projects: {error}
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="projects">
@@ -89,7 +120,7 @@ export default function ProjectsSection({ currentTheme }) {
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
                     gap: '1.5rem',
-                    gridAutoFlow: 'dense' // This is key for priority layout
+                    gridAutoFlow: 'dense'
                 }}
             >
                 {/* Render big projects first */}
